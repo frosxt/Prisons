@@ -1,0 +1,147 @@
+messages:
+  platform-command-player_only:
+    chat:
+      enabled: true
+      value:
+        - "This command can only be used by players."
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: false
+      value: ""
+      volume: 1.0
+      pitch: 1.0
+
+  platform-command-console_only:
+    chat:
+      enabled: true
+      value:
+        - "This command can only be used from console."
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: false
+      value: ""
+      volume: 1.0
+      pitch: 1.0
+
+  platform-command-no_permission:
+    chat:
+      enabled: true
+      value:
+        - "&cYou do not have permission to use this command."
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: true
+      value: "entity.villager.no"
+      volume: 1.0
+      pitch: 1.0
+
+  platform-command-subcommand_player_only:
+    chat:
+      enabled: true
+      value:
+        - "This subcommand can only be used by players."
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: false
+      value: ""
+      volume: 1.0
+      pitch: 1.0
+
+  platform-command-subcommand_console_only:
+    chat:
+      enabled: true
+      value:
+        - "This subcommand can only be used from console."
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: false
+      value: ""
+      volume: 1.0
+      pitch: 1.0
+
+  platform-command-error:
+    chat:
+      enabled: true
+      value:
+        - "&c{error}"
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: false
+      value: ""
+      volume: 1.0
+      pitch: 1.0
+
+  platform-command-usage:
+    chat:
+      enabled: true
+      value:
+        - "&eUsage: {usage}"
+    action-bar:
+      enabled: false
+      value: ""
+    title:
+      enabled: false
+      title: ""
+      subtitle: ""
+      fade-in: 10
+      stay: 40
+      fade-out: 10
+    sound:
+      enabled: false
+      value: ""
+      volume: 1.0
+      pitch: 1.0

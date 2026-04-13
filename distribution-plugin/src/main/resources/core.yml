@@ -1,0 +1,8 @@
+# PrisonCore configuration
+debug: false
+
+storage:
+  backend: json
+
+economy:
+  default-currency: money

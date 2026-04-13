@@ -1,0 +1,6 @@
+name: PrisonCore
+version: '${version}'
+main: com.github.frosxt.prisoncore.distribution.PrisonCorePlugin
+api-version: '1.20'
+load: STARTUP
+description: Modular prison core platform
