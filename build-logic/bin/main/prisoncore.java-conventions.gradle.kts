@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.github.frosxt.prisoncore"
-version = "1.0.0-SNAPSHOT"
+version = "v1.0.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
