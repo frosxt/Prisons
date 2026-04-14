@@ -3,9 +3,24 @@ package com.github.frosxt.prisoncore.menu.api;
 import com.github.frosxt.prisoncore.menu.api.layout.MenuLayout;
 import com.github.frosxt.prisoncore.menu.api.layout.SlotDescriptor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
 
+/**
+ * Immutable description of a paginated inventory menu. Items are laid out into a
+ * contiguous content range; previous/next buttons are placed at configurable slots
+ * outside the range, defaulting to the bottom-left and bottom-right corners.
+ */
 public final class PaginatedMenuDescriptor {
+
+    private static final Logger LOGGER = Logger.getLogger(PaginatedMenuDescriptor.class.getName());
+    private static final int UNSET_SLOT = -1;
+
     private final String id;
     private final String title;
     private final int rows;
@@ -13,6 +28,8 @@ public final class PaginatedMenuDescriptor {
     private final int contentEndSlot;
     private final SlotDescriptor previousButton;
     private final SlotDescriptor nextButton;
+    private final int previousButtonSlot;
+    private final int nextButtonSlot;
     private final List<SlotDescriptor> items;
 
     private PaginatedMenuDescriptor(final Builder builder) {
@@ -23,7 +40,14 @@ public final class PaginatedMenuDescriptor {
         this.contentEndSlot = builder.contentEndSlot;
         this.previousButton = builder.previousButton;
         this.nextButton = builder.nextButton;
+        this.previousButtonSlot = builder.previousButtonSlot != UNSET_SLOT
+                ? builder.previousButtonSlot
+                : rows * 9 - 9;
+        this.nextButtonSlot = builder.nextButtonSlot != UNSET_SLOT
+                ? builder.nextButtonSlot
+                : rows * 9 - 1;
         this.items = Collections.unmodifiableList(new ArrayList<>(builder.items));
+        validateButtonPlacement();
     }
 
     public String id() {
@@ -54,6 +78,14 @@ public final class PaginatedMenuDescriptor {
         return nextButton;
     }
 
+    public int previousButtonSlot() {
+        return previousButtonSlot;
+    }
+
+    public int nextButtonSlot() {
+        return nextButtonSlot;
+    }
+
     public List<SlotDescriptor> items() {
         return items;
     }
@@ -80,17 +112,49 @@ public final class PaginatedMenuDescriptor {
         }
 
         if (pageNumber > 0 && previousButton != null) {
-            final int prevSlot = rows * 9 - 9;
-            slots.put(prevSlot, previousButton);
+            slots.put(previousButtonSlot, previousButton);
         }
 
         if (pageNumber < totalPages() - 1 && nextButton != null) {
-            final int nextSlot = rows * 9 - 1;
-            slots.put(nextSlot, nextButton);
+            slots.put(nextButtonSlot, nextButton);
         }
 
         final MenuLayout layout = new MenuLayout(slots);
         return new MenuDescriptor(id, title, rows, layout);
+    }
+
+    private void validateButtonPlacement() {
+        final int inventorySize = rows * 9;
+        if (previousButton != null) {
+            checkSlotBounds("previousButton", previousButtonSlot, inventorySize);
+            checkSlotCollision("previousButton", previousButtonSlot);
+        }
+        if (nextButton != null) {
+            checkSlotBounds("nextButton", nextButtonSlot, inventorySize);
+            checkSlotCollision("nextButton", nextButtonSlot);
+        }
+        if (previousButton != null && nextButton != null && previousButtonSlot == nextButtonSlot) {
+            LOGGER.warning("[PrisonCore] PaginatedMenuDescriptor '" + id
+                    + "' has previousButton and nextButton at the same slot " + previousButtonSlot
+                    + "; the next button will overwrite the previous button on every page after the first.");
+        }
+    }
+
+    private void checkSlotBounds(final String label, final int slot, final int inventorySize) {
+        if (slot < 0 || slot >= inventorySize) {
+            LOGGER.warning("[PrisonCore] PaginatedMenuDescriptor '" + id + "' " + label
+                    + " slot " + slot + " is outside the inventory (" + inventorySize + " slots)."
+                    + " The button will not be rendered.");
+        }
+    }
+
+    private void checkSlotCollision(final String label, final int slot) {
+        if (slot >= contentStartSlot && slot <= contentEndSlot) {
+            LOGGER.warning("[PrisonCore] PaginatedMenuDescriptor '" + id + "' " + label
+                    + " slot " + slot + " lands inside the content range ["
+                    + contentStartSlot + ".." + contentEndSlot + "];"
+                    + " it will overwrite a content item on pages that fill that slot.");
+        }
     }
 
     public static Builder builder() {
@@ -105,6 +169,8 @@ public final class PaginatedMenuDescriptor {
         private int contentEndSlot;
         private SlotDescriptor previousButton;
         private SlotDescriptor nextButton;
+        private int previousButtonSlot = UNSET_SLOT;
+        private int nextButtonSlot = UNSET_SLOT;
         private final List<SlotDescriptor> items = new ArrayList<>();
 
         private Builder() {}
@@ -137,6 +203,24 @@ public final class PaginatedMenuDescriptor {
 
         public Builder nextButton(final SlotDescriptor nextButton) {
             this.nextButton = nextButton;
+            return this;
+        }
+
+        /**
+         * Override the inventory slot where the previous-page button renders.
+         * Defaults to the bottom-left slot ({@code rows * 9 - 9}).
+         */
+        public Builder previousButtonSlot(final int slot) {
+            this.previousButtonSlot = slot;
+            return this;
+        }
+
+        /**
+         * Override the inventory slot where the next-page button renders.
+         * Defaults to the bottom-right slot ({@code rows * 9 - 1}).
+         */
+        public Builder nextButtonSlot(final int slot) {
+            this.nextButtonSlot = slot;
             return this;
         }
 
