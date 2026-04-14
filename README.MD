@@ -205,4 +205,4 @@ If the issue is with a specific feature module rather than the core itself, open
 
 ## License
 
-See `LICENSE` in the repository root.
+See [LICENSE](https://github.com/frosxt/Prisons/blob/main/LICENSE).
