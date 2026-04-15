@@ -48,8 +48,31 @@ public final class ModuleGraphResolver {
                     if (rejected.contains(id)) {
                         continue;
                     }
+                    boolean rejectedNow = false;
                     for (final String dep : candidate.descriptor().requiredDependencies()) {
                         if (rejected.contains(dep)) {
+                            rejected.add(id);
+                            changed = true;
+                            rejectedNow = true;
+                            break;
+                        }
+                    }
+                    if (rejectedNow) {
+                        continue;
+                    }
+                    for (final String cap : candidate.descriptor().requiresCapabilities()) {
+                        final Set<String> providers = capabilityProviders.get(cap);
+                        if (providers == null) {
+                            continue;
+                        }
+                        boolean anyAlive = false;
+                        for (final String provider : providers) {
+                            if (!rejected.contains(provider)) {
+                                anyAlive = true;
+                                break;
+                            }
+                        }
+                        if (!anyAlive) {
                             rejected.add(id);
                             changed = true;
                             break;
@@ -79,20 +102,35 @@ public final class ModuleGraphResolver {
 
         for (final ModuleCandidate candidate : candidates) {
             final ModuleDescriptor desc = candidate.descriptor();
+            final String selfId = desc.id();
+
             for (final String dep : desc.requiredDependencies()) {
                 if (byId.containsKey(dep)) {
-                    adjacency.computeIfAbsent(dep, k -> new HashSet<>()).add(desc.id());
-                    inDegree.merge(desc.id(), 1, Integer::sum);
+                    if (adjacency.computeIfAbsent(dep, k -> new HashSet<>()).add(selfId)) {
+                        inDegree.merge(selfId, 1, Integer::sum);
+                    }
                 }
             }
+
+            for (final String dep : desc.optionalDependencies()) {
+                if (byId.containsKey(dep)) {
+                    if (adjacency.computeIfAbsent(dep, k -> new HashSet<>()).add(selfId)) {
+                        inDegree.merge(selfId, 1, Integer::sum);
+                    }
+                }
+            }
+
             for (final String cap : desc.requiresCapabilities()) {
                 final Set<String> providers = capabilityProviders.get(cap);
-                if (providers != null) {
-                    for (final String provider : providers) {
-                        if (!provider.equals(desc.id())) {
-                            adjacency.computeIfAbsent(provider, k -> new HashSet<>()).add(desc.id());
-                            inDegree.merge(desc.id(), 1, Integer::sum);
-                        }
+                if (providers == null) {
+                    continue;
+                }
+                for (final String provider : providers) {
+                    if (provider.equals(selfId)) {
+                        continue;
+                    }
+                    if (adjacency.computeIfAbsent(provider, k -> new HashSet<>()).add(selfId)) {
+                        inDegree.merge(selfId, 1, Integer::sum);
                     }
                 }
             }
