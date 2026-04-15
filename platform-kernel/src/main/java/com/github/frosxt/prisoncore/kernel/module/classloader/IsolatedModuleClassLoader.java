@@ -2,6 +2,8 @@ package com.github.frosxt.prisoncore.kernel.module.classloader;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
+import java.util.List;
 
 public final class IsolatedModuleClassLoader extends URLClassLoader {
     private static final String[] DELEGATED_PREFIXES = {
@@ -10,8 +12,15 @@ public final class IsolatedModuleClassLoader extends URLClassLoader {
         "com.github.frosxt.prisoncore.commons.api."
     };
 
+    private final List<ClassLoader> dependencyLoaders;
+
     public IsolatedModuleClassLoader(final URL[] urls, final ClassLoader parent) {
+        this(urls, parent, Collections.emptyList());
+    }
+
+    public IsolatedModuleClassLoader(final URL[] urls, final ClassLoader parent, final List<ClassLoader> dependencyLoaders) {
         super(urls, parent);
+        this.dependencyLoaders = List.copyOf(dependencyLoaders);
     }
 
     @Override
@@ -30,18 +39,34 @@ public final class IsolatedModuleClassLoader extends URLClassLoader {
             return getParent().loadClass(name);
         }
 
-        try {
-            Class<?> c = findLoadedClass(name);
-            if (c != null) {
-                return c;
-            }
-            c = findClass(name);
+        final Class<?> already = findLoadedClass(name);
+        if (already != null) {
             if (resolve) {
-                resolveClass(c);
+                resolveClass(already);
             }
-            return c;
-        } catch (final ClassNotFoundException e) {
-            return super.loadClass(name, resolve);
+            return already;
         }
+
+        try {
+            final Class<?> own = findClass(name);
+            if (resolve) {
+                resolveClass(own);
+            }
+            return own;
+        } catch (final ClassNotFoundException ignored) {
+        }
+
+        for (final ClassLoader dep : dependencyLoaders) {
+            try {
+                final Class<?> shared = dep.loadClass(name);
+                if (resolve) {
+                    resolveClass(shared);
+                }
+                return shared;
+            } catch (final ClassNotFoundException ignored) {
+            }
+        }
+
+        return super.loadClass(name, resolve);
     }
 }

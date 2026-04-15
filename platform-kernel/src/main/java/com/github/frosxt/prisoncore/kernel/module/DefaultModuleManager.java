@@ -118,8 +118,23 @@ public final class DefaultModuleManager {
 
         try {
             final URL jarUrl = candidate.jarPath().toUri().toURL();
+
+            final List<ClassLoader> dependencyLoaders = new ArrayList<>();
+            for (final String dep : desc.requiredDependencies()) {
+                final DefaultModuleHandle depHandle = handles.get(dep);
+                if (depHandle != null) {
+                    dependencyLoaders.add(depHandle.classLoader());
+                }
+            }
+            for (final String dep : desc.optionalDependencies()) {
+                final DefaultModuleHandle depHandle = handles.get(dep);
+                if (depHandle != null) {
+                    dependencyLoaders.add(depHandle.classLoader());
+                }
+            }
+
             final ClassLoader classLoader = new IsolatedModuleClassLoader(
-                    new URL[]{jarUrl}, getClass().getClassLoader());
+                    new URL[]{jarUrl}, getClass().getClassLoader(), dependencyLoaders);
 
             final DefaultModuleHandle handle = new DefaultModuleHandle(desc, classLoader);
             handles.put(desc.id(), handle);
