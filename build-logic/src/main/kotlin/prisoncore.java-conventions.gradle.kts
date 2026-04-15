@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.frosxt.prisoncore"
-version = (findProperty("prisonCoreVersion") as String?) ?: "1.0.0-SNAPSHOT"
+version = (findProperty("prisonCoreVersion") as String?) ?: "v1.0.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
