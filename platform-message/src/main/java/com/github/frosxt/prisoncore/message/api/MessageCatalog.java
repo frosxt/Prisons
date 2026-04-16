@@ -20,4 +20,12 @@ public interface MessageCatalog {
 
     /** Re-read {@code messages.yml} and swap in the new catalog atomically. */
     void reload();
+
+    /**
+     * Register a code-owned default message. The operator's {@code messages.yml}
+     * still wins over a default with the same key. Modules call this in
+     * {@code onPrepare} or {@code onEnable} to ship sane fallbacks so missing
+     * keys never surface as "Missing message:" errors at runtime.
+     */
+    void registerDefault(ConfiguredMessage message);
 }

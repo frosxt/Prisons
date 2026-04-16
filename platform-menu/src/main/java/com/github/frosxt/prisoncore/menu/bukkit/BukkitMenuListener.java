@@ -73,7 +73,11 @@ public final class BukkitMenuListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(final InventoryCloseEvent event) {
-        if (event.getPlayer() instanceof final Player player) {
+        if (!(event.getPlayer() instanceof final Player player)) {
+            return;
+        }
+        final BukkitMenuService.ActiveMenu active = menuService.getActiveMenu(player.getUniqueId());
+        if (active != null && event.getInventory().equals(active.inventory())) {
             menuService.removeActiveMenu(player.getUniqueId());
         }
     }

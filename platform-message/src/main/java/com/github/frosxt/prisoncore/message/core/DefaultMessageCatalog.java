@@ -60,6 +60,11 @@ public final class DefaultMessageCatalog implements MessageCatalog {
         loadFromConfig();
     }
 
+    @Override
+    public void registerDefault(final ConfiguredMessage message) {
+        defaults.register(message);
+    }
+
     @SuppressWarnings("unchecked")
     private void loadFromConfig() {
         final Map<String, Object> data = configService.load(CONFIG_NAME);

@@ -4,6 +4,7 @@ import com.github.frosxt.prisoncore.command.api.CommandContext;
 import com.github.frosxt.prisoncore.command.api.CommandDescriptor;
 import com.github.frosxt.prisoncore.command.api.CommandResult;
 import com.github.frosxt.prisoncore.command.api.PermissionPolicy;
+import com.github.frosxt.prisoncore.commons.bukkit.color.ColorTranslator;
 import com.github.frosxt.prisoncore.message.api.MessageService;
 import com.github.frosxt.prisoncore.message.api.model.PlatformMessages;
 
@@ -162,7 +163,7 @@ final class WrappedCommand extends BukkitCommand {
     private void handleResult(final CommandSender sender, final CommandResult result) {
         if (result instanceof final CommandResult.Success s) {
             if (s.message() != null) {
-                sender.sendMessage(s.message());
+                sender.sendMessage(ColorTranslator.colorize(s.message()));
             }
         } else if (result instanceof final CommandResult.Error e) {
             messageService.send(sender, PlatformMessages.COMMAND_ERROR,

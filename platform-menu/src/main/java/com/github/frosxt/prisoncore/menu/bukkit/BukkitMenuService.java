@@ -1,5 +1,6 @@
 package com.github.frosxt.prisoncore.menu.bukkit;
 
+import com.github.frosxt.prisoncore.commons.bukkit.color.ColorTranslator;
 import com.github.frosxt.prisoncore.menu.api.MenuDescriptor;
 import com.github.frosxt.prisoncore.menu.api.MenuService;
 import com.github.frosxt.prisoncore.menu.api.MenuSession;
@@ -26,7 +27,8 @@ public final class BukkitMenuService implements MenuService {
             return;
         }
 
-        final Inventory inventory = Bukkit.createInventory(null, descriptor.size(), descriptor.title());
+        final Inventory inventory = Bukkit.createInventory(null, descriptor.size(),
+                ColorTranslator.colorize(descriptor.title()));
 
         if (descriptor.layout() != null) {
             for (final Map.Entry<Integer, SlotDescriptor> entry : descriptor.layout().slots().entrySet()) {
