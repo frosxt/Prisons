@@ -1,9 +1,14 @@
 package com.github.frosxt.prisoncore.kernel.module.classloader;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class IsolatedModuleClassLoader extends URLClassLoader {
     private static final String[] DELEGATED_PREFIXES = {
@@ -68,5 +73,60 @@ public final class IsolatedModuleClassLoader extends URLClassLoader {
         }
 
         return super.loadClass(name, resolve);
+    }
+
+    @Override
+    public URL getResource(final String name) {
+        final URL local = findResource(name);
+        if (local != null) {
+            return local;
+        }
+        for (final ClassLoader dep : dependencyLoaders) {
+            final URL shared = dep.getResource(name);
+            if (shared != null) {
+                return shared;
+            }
+        }
+        final ClassLoader parent = getParent();
+        if (parent != null) {
+            return parent.getResource(name);
+        }
+        return null;
+    }
+
+    @Override
+    public InputStream getResourceAsStream(final String name) {
+        final URL resource = getResource(name);
+        if (resource == null) {
+            return null;
+        }
+        try {
+            return resource.openStream();
+        } catch (final IOException ex) {
+            return null;
+        }
+    }
+
+    @Override
+    public Enumeration<URL> getResources(final String name) throws IOException {
+        final Set<URL> combined = new LinkedHashSet<>();
+        final Enumeration<URL> own = findResources(name);
+        while (own.hasMoreElements()) {
+            combined.add(own.nextElement());
+        }
+        for (final ClassLoader dep : dependencyLoaders) {
+            final Enumeration<URL> depResources = dep.getResources(name);
+            while (depResources.hasMoreElements()) {
+                combined.add(depResources.nextElement());
+            }
+        }
+        final ClassLoader parent = getParent();
+        if (parent != null) {
+            final Enumeration<URL> parentResources = parent.getResources(name);
+            while (parentResources.hasMoreElements()) {
+                combined.add(parentResources.nextElement());
+            }
+        }
+        return Collections.enumeration(combined);
     }
 }
